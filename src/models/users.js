@@ -1,9 +1,8 @@
 const mongoose= require('mongoose')
 const validator= require('validator')
+const bcrypt = require('bcryptjs')
 
-
-
-const User= mongoose.model('User',{
+const userschema = new mongoose.Schema({
     name:{
         type:String,
         required:true,
@@ -37,6 +36,7 @@ const User= mongoose.model('User',{
     },
     email:{
         type:String,
+        unique:true,
         required:true,
         trim:true,
         lowercase:true,
@@ -48,5 +48,37 @@ const User= mongoose.model('User',{
         }
     }
 })
+
+userschema.statics.findByCredentials= async (email,password)=>{
+    const user = await User.findOne({email})
+    if(!user){
+        throw new Error("unable to login")
+    }
+    const isMatch =  await bcrypt.compare(password,user.password)
+    if(!isMatch){
+        throw new Error("unable to login")
+    }
+    console.log('test')
+    return user
+
+
+}
+
+userschema.pre('save',async function(next){
+    console.log('inside middleware')
+    const user = this
+    if(user.isModified('password')){
+        user.password =  await bcrypt.hash(user.password,8)
+
+    }
+
+    next()
+
+})
+
+
+const User= mongoose.model('User',userschema)
+
+
 
 module.exports= User
