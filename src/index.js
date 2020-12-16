@@ -10,6 +10,12 @@ const { json } = require('express')
 const app = express()
 const port = process.env.PORT||3000
 
+
+// app.use((req,res,next)=>{
+//     res.status(503).send("the site is under maintainence ! Please visit again after some time")
+
+// })
+
 app.use(express.json())
 app.use(taskrouter)
 app.use(userrouter)
@@ -36,7 +42,16 @@ app.use(userrouter)
 //     console.log(result)
 
 //     }
-//     catch(e){
+//     catch // try{
+    //     const users= await User.find({})
+    //     res.send(users)
+
+    // }
+    // catch(e){
+    //     res.send(e).status(404)
+
+    // }
+// (e){
 //         console.log("the error is "+e)
 //     }
 

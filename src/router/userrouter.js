@@ -1,4 +1,5 @@
 const express= require('express')
+const auth = require('../middleware/auth')
 const User = require('../models/users')
 const userrouter = new express.Router()
 
@@ -7,7 +8,8 @@ userrouter.post('/users',async(req,res)=>{
     
     try{
         await user1.save()
-        res.send(user1)
+        const token = await  user1.generateAuthToken()
+        res.send({user1,token})
         
 
     }
@@ -18,22 +20,23 @@ userrouter.post('/users',async(req,res)=>{
 })
 
 
-userrouter.get('/users', async(req,res)=>{
+userrouter.get('/users/me',auth, async(req,res)=>{
     // User.find({}).then((users)=>{
     //     res.send(users)
 
     // }).catch((e)=>{
     //     res.send(e).status(400)
     // })
-    try{
-        const users= await User.find({})
-        res.send(users)
+    // try{
+    //     const users= await User.find({})
+    //     res.send(users)
 
-    }
-    catch(e){
-        res.send(e).status(404)
+    // }
+    // catch(e){
+    //     res.send(e).status(404)
 
-    }
+    // }
+    res.send(req.user)
 
 
 })  
@@ -68,14 +71,17 @@ userrouter.patch('/users/:id', async (req,res)=>{
 
 userrouter.post('/users/login', async (req,res)=>{
     try{
-        console.log("me")
+       
         const user = await User.findByCredentials(req.body.email,req.body.password)
-        console.log("tets")
+        const token = await  user.generateAuthToken()
+        // await  user.generateAuthTocken()
+        // console.log(tocken)
+        
         res.send(user)
 
     }
     catch(e){
-        res.status(400).send("there is an error")
+        res.status(400).send("there is an error"+e)
 
     }
 })
