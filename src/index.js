@@ -58,8 +58,17 @@ app.use(userrouter)
 
 // }
 // myfun()
+// const Task= require('../src/models/task')
+// const User = require('../src/models/users')
     
+// const main =  async function(){
+//     const user = await User.findById('5fddf2500a583b103d70b101')
+//     await user.populate('task').execPopulate()
+//     console.log(user.task)
 
+
+// }
+// main()
 
 
 
