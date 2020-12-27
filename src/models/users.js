@@ -1,5 +1,6 @@
 const mongoose= require('mongoose')
 const validator= require('validator')
+const sharp = require('sharp')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const Task = require('../models/task')
@@ -48,6 +49,10 @@ const userschema = new mongoose.Schema({
                 throw new Error(' this is not a valid email')
             }
         }
+
+    },
+    avatar:{
+        type:Buffer
     },
     tokens:[{
         token:{
@@ -72,6 +77,7 @@ userschema.methods.toJSON=  function(){
         const userObject = user.toObject()
         delete userObject.password
         delete userObject.tokens
+        delete userObject.avatar
 
         return userObject
 
@@ -81,7 +87,7 @@ userschema.methods.toJSON=  function(){
 
 userschema.methods.generateAuthToken= async function (){
     const user = this 
-    const token = await jwt.sign({_id:user._id.toString()},"thisismynodecourse")
+    const token = await jwt.sign({_id:user._id.toString()},process.env.SECRET)
     user.tokens = user.tokens.concat({ token })
      await user.save()
     //  console.log("erro")

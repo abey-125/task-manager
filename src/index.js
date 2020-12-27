@@ -8,7 +8,7 @@ const userrouter = require('./router/userrouter')
 const { json } = require('express')
 
 const app = express()
-const port = process.env.PORT||3000
+const port = process.env.PORT
 
 
 // app.use((req,res,next)=>{
@@ -69,6 +69,26 @@ app.use(userrouter)
 
 // }
 // main()
+
+// const multer =require('multer')
+
+// const upload = multer({
+//     dest:'images',
+//     limits:{
+//         fileSize:1000000
+//     },
+//     fileFilter(req,file,cb){
+//         if(!file.originalname.match(/\.(doc|docx)$/)){
+//              return cb(new Error('not a valid file'))
+
+//         }
+//         cb(undefined,true)
+//     }
+// })
+
+// app.get('/upload',upload.single('upload'),(req,res)=>{
+//     res.send()
+// })
 
 
 

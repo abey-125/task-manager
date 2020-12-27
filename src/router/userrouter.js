@@ -1,10 +1,30 @@
 const express= require('express')
 const auth = require('../middleware/auth')
 const User = require('../models/users')
+const email= require('../email/account')
+const multer =require('multer')
+const sharp = require('sharp')
+const mail = require('@sendgrid/mail')
 const userrouter = new express.Router()
+
+const upload=multer({
+    
+    limits:{
+        fileSize:1000000
+    },
+    fileFilter(req,file,cb){
+        if(!file.originalname.match(/\.(jpg|jpeg|png)$/)){
+           return cb(new Error("file format not supported"))
+        }
+        cb(undefined,true)
+    }
+
+    
+})
 
 userrouter.post('/users',async(req,res)=>{
     const user1= new User(req.body)
+    email.sendWelocomeEmail(user1.email,user1.name)
     
     try{
         await user1.save()
@@ -125,7 +145,8 @@ userrouter.delete('/users/me',auth,async(req,res)=>{
     try{
         
         await req.user.remove()
-        res.send("removed your accout..")
+        email.sendCancelEmail(req.user.email,req.user.name)
+        res.send("removed your account..")
 
     }
     catch(e){
@@ -162,5 +183,39 @@ userrouter.get('/users/:id',async(req,res)=>{
 
 
 })
+
+
+userrouter.post('/users/me/avatar',auth,upload.single('avatar'), async (req,res)=>{
+    const buffer = await sharp(req.file.buffer).resize({width:250,height:250}).png().toBuffer()
+
+    req.user.avatar = buffer
+    await req.user.save()
+    res.send()
+},(error,req,res,next)=>{
+    res.status(400).send({
+        error:error.message
+    })
+})
+
+userrouter.delete('/users/me/del_avatar',auth, async (req,res)=>{
+    req.user.avatar=undefined
+    await req.user.save()
+    
+    res.status(200).send("profile deleted")
+})
+userrouter.get('/users/:id/avatar',async (req,res)=>{
+    try{
+        const user = await User.findById(req.params.id)
+        if(!user || !user.avatar){
+            throw new Error("unable to find user")
+        }
+        res.set('content-type','image/jpg')
+        res.send(user.avatar)
+    }
+    catch(e){
+        res.status(400).send()
+    }
+})
+
 
 module.exports = userrouter
